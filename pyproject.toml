@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "fastapi-project"
+version = "0.1.0"
+description = "Projeto de estudos de uma API com banco de dados"
+authors = ["Endy Haiabe"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.109.0"
+uvicorn = "^0.27.0.post1"
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+psycopg2 = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
