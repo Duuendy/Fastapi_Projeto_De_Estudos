@@ -1,7 +1,7 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 
-DATABASE_URL = 'psotgresql://postgres:123456@localhost:5432/fastapi_estudos'
+DATABASE_URL = 'postgresql://postgres:123456@localhost:5432/fastapi_estudos'
 DB_Engine = create_engine(DATABASE_URL, echo=True)
 DB_Session_Pool = sessionmaker(autocommit=False, autoflush=False, bind=DB_Engine)
 
@@ -12,7 +12,7 @@ class DBModel(DeclarativeBase):
 def get_db_connection() -> Session:
 
     db_connection = DB_Session_Pool()
-
+    
     try:
         yield db_connection
 
