@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker , Session, DeclarativeBase
 
 DATABASE_URL = 'postgresql://postgres:123456@localhost:5432/fastapi_estudos'
 DB_Engine = create_engine(DATABASE_URL, echo=True)

@@ -1,7 +1,10 @@
 from decimal import Decimal
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from domain.conection import get_db_connection
 
 router = APIRouter(prefix="/contas-a-pagar-e-receber")
 
@@ -17,7 +20,7 @@ class contasPagarReceberRequest(BaseModel):
     tipo: str
 
 
-@router.get("/", response_model=List[contasPagarReceberResponse])
+@router.get("", response_model=List[contasPagarReceberResponse])
 def listar_contas():
     # metodo irá retornar uma lista de informações de operações bancárias
     return [
@@ -36,7 +39,10 @@ def listar_contas():
     ]    
 
 @router.post("/", response_model=contasPagarReceberResponse, status_code=201)
-def criar_conta(conta: contasPagarReceberRequest):
+def criar_conta(conta: contasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)):
+
+    
+
     return contasPagarReceberResponse(
             id=3,
             descricao=conta.descricao,
