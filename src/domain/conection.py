@@ -6,8 +6,12 @@ DB_Engine = create_engine(DATABASE_URL, echo=True)
 DB_Session_Pool = sessionmaker(autocommit=False, autoflush=False, bind=DB_Engine)
 
 class DBModel(DeclarativeBase):
-
+    """
+    Classe que herda de `sqlalchemy.DeclarativeBase`.
+    Todas as classes que herdarem esta classe, serão mapeadas com tabelas no banco de dados.
+    """
     pass
+
 
 def get_db_connection() -> Session:
 

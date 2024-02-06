@@ -4,8 +4,6 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from domain.conection import get_db_connection
-
 router = APIRouter(prefix="/contas-a-pagar-e-receber")
 
 class contasPagarReceberResponse(BaseModel):
@@ -39,7 +37,7 @@ def listar_contas():
     ]    
 
 @router.post("/", response_model=contasPagarReceberResponse, status_code=201)
-def criar_conta(conta: contasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)):
+def criar_conta(conta: contasPagarReceberRequest):
 
     
 
