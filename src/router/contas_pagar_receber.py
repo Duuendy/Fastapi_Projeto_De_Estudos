@@ -45,7 +45,8 @@ def listar_contas():
 
 @router.post("/", response_model=contasPagarReceberResponse, status_code=201)
 def criar_conta(conta_a_pagar_e_receber_request: contasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)) -> contasPagarReceberResponse:
- 
+    
+    #Para escrever no banco, crio uma variável que tem como modelo a Class do db_models, usando os parametros e passando em uma lista;  
     conta_a_pagar_e_receber = ContasPagarReceber(
         **conta_a_pagar_e_receber_request.model_dump()
     )

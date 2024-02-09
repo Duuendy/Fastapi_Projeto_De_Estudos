@@ -1,13 +1,18 @@
 from fastapi import FastAPI
 
-
-from src.domain.conection import DB_Engine
-from src.models.db_models import ContasPagarReceber
 from src.router import contas_pagar_receber
 
 
-ContasPagarReceber.metadata.drop_all(bind=DB_Engine)
-ContasPagarReceber.metadata.create_all(bind=DB_Engine)
+#Comando teste para verificar se os metodos de criação do BD estava funcionando - OK
+#Importações para criação do banco de dados
+# from src.domain.conection import DB_Engine
+# from src.models.db_models import ContasPagarReceber
+
+#Comando para derrubar e criar o BD assim que a aplicação fosse inicializada.
+# ContasPagarReceber.metadata.drop_all(bind=DB_Engine)
+# ContasPagarReceber.metadata.create_all(bind=DB_Engine)
+
+
 
 app = FastAPI()
 app.include_router(contas_pagar_receber.router)
