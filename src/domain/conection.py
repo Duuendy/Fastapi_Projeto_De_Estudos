@@ -13,7 +13,7 @@ class DBModel(DeclarativeBase):
     pass
 
 
-def get_db_connection() -> Session:
+def get_db_connection() -> Session: # type: ignore
 
     db_connection = DB_Session_Pool()
     

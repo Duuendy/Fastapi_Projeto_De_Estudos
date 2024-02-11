@@ -1,32 +1,62 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from src.models.db_models import ContasPagarReceber
+from src.domain.conection import get_db_connection
 
 from main import app
+
+
+#Para rodar o teste, só chamar o pytest no terminal, não está funcionando, informa o erro de não encontrar a rota de alguns classes. Precisei usar o comando python -m pytest -v
+
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread":False})
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def override_get_db():
+    db = TestingSessionLocal
+    try:
+        yield db
+    finally:
+        db.close()
+
+#Passo a funcao original como parametro para a funcao de teste
+app.dependency_overrides[get_db_connection] = override_get_db
 
 client = TestClient(app)
 
 def test_contas_pagar_receber():
+
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+
     response = client.get('/contas-a-pagar-e-receber')
-
     assert response.status_code == 200
-
     assert response.json() == [
         {'id': 1, 'descricao': 'Aluguel', 'valor': '1000.5', 'tipo': 'PAGAR'}, 
         {'id': 2, 'descricao': 'Salario', 'valor': '5555.55', 'tipo': 'RECEBER'}
     ]
 
 def test_deve_criar_conta_pagar_receber():
+
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
     
     nova_conta = {
         "descricao": "Faculdade",
         "valor": 150.00,
         "tipo": "PAGAR"
     }
-
- 
     response = client.post('/contas-a-pagar-e-receber', json=nova_conta)
 
+    nova_conta_copy = nova_conta.copy()
+    nova_conta_copy["id"] = 1
+    assert response.json()  == nova_conta_copy
+    
     assert response.status_code == 201
- 
+    
 
     #nova_conta_copy = nova_conta.copy()
     #nova_conta_copy["id"] = 3
