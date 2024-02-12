@@ -27,7 +27,7 @@ app.dependency_overrides[get_db_connection] = override_get_db
 
 client = TestClient(app)
 
-def test_contas_pagar_receber():
+def test_listar_contas_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
@@ -39,7 +39,7 @@ def test_contas_pagar_receber():
         {'id': 2, 'descricao': 'Salario', 'valor': '5555.55', 'tipo': 'RECEBER'}
     ]
 
-def test_deve_criar_conta_pagar_receber():
+def test_criar_conta_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
@@ -49,14 +49,24 @@ def test_deve_criar_conta_pagar_receber():
         "valor": 150.00,
         "tipo": "PAGAR"
     }
-    response = client.post('/contas-a-pagar-e-receber', json=nova_conta)
-
+    
     nova_conta_copy = nova_conta.copy()
     nova_conta_copy["id"] = 1
-    assert response.json()  == nova_conta_copy
+
+    response = client.post('/contas-a-pagar-e-receber', json=nova_conta)
     
     assert response.status_code == 201
+    assert response.json()  == nova_conta_copy
+
+def teste_retornar_erro_descricao():
+    response = client.post('/contas-a-pagar-e-receber', json={
+        "descricao": "0123456789012345678901234567890",
+        "valor": 150.00,
+        "tipo": "PAGAR"
+    })
     
+    assert response.status_code == 422
+    #SQLite não força o tamanho de um VARCHAR
 
     #nova_conta_copy = nova_conta.copy()
     #nova_conta_copy["id"] = 3
