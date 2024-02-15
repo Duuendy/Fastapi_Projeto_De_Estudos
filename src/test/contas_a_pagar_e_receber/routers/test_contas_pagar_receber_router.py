@@ -1,10 +1,27 @@
 from fastapi.testclient import TestClient
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.models.db_models import ContasPagarReceber
 from src.domain.conection import get_db_connection
 
+# from unittest.mock import Mock
+# from faker import Faker
 from main import app
+
+# fake = Faker()
+
+# @pytest.fixture
+# def mock_contas_pagar_receber() -> ContasPagarReceber:
+
+#     mocked_constas_pg = Mock(spec_set=ContasPagarReceber)
+#     mocked_constas_pg.id.return_value = fake.random_int(min=1, max=30)
+#     mocked_constas_pg.descricao.return_value = fake.descricao()
+#     mocked_constas_pg.valor.return_value = fake.random_numeric()
+#     mocked_constas_pg.tipo.return_value = fake.tipo()
+
+#     return mocked_constas_pg
+
 
 
 #Para rodar o teste, só chamar o pytest no terminal, não está funcionando, informa o erro de não encontrar a rota de alguns classes. Precisei usar o comando python -m pytest -v
@@ -80,4 +97,26 @@ def teste_retornar_erro_descricao():
     #Para a solução, testei força formatar os valores, porem sem sucesso 
     #assert "{:.2f}".format(response.json()["valor"]) == "{:.2f}".format(nova_conta_copy["valor"])
 
+def test_atualizar_conta_pagar_receber():
+
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+    
+    
+    response = client.post('/contas-a-pagar-e-receber', json=nova_conta)
+    nova_conta = {
+        "descricao": "Faculdade",
+        "valor": 150.00,
+        "tipo": "PAGAR"
+    }
+
+    id_da_conta_pagar_receber = response.json()['id']
+
+    response_put = client.put('/contas-a-pagar-e-receber/{id_da_conta_pagar_receber}', json={
+        "descricao": "Faculdade",
+        "valor": 150.00,
+        "tipo": "PAGAR"
+    })
+
+    assert response_put.status_code == 200
     
