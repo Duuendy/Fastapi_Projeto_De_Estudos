@@ -59,6 +59,12 @@ def listar_contas(db_connection: Session = Depends(get_db_connection)) -> Contas
 #             tipo="RECEBER"
 #         ),       
 #     ]    
+
+@router.get("/{id_conta_a_pagar_e_receber}", response_model=ContasPagarReceberResponse)
+def listar_contas_id(id_conta_a_pagar_e_receber: int, db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
+    #conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
+
+    return db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
     
 @router.post("", response_model=ContasPagarReceberResponse, status_code=201)
 def criar_conta(conta_a_pagar_e_receber_request: ContasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
@@ -74,17 +80,28 @@ def criar_conta(conta_a_pagar_e_receber_request: ContasPagarReceberRequest, db_c
 
     return conta_a_pagar_e_receber
 
-# @router.put("/{id_conta_a_pagar_e_receber}", response_model=ContasPagarReceberResponse, status_code=200)
-# def criar_conta(conta_a_pagar_e_receber_request: ContasPagarReceberRequest, 
-#                 db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
+@router.put("/{id_conta_a_pagar_e_receber}", response_model=ContasPagarReceberResponse, status_code=200)
+def atualizar_conta(id_conta_a_pagar_e_receber: int, 
+                conta_a_pagar_e_receber_request: ContasPagarReceberRequest, 
+                db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
     
-#     conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
-#     conta_a_pagar_e_receber.tipo = conta_a_pagar_e_receber_request.tipo
-#     conta_a_pagar_e_receber.valor = conta_a_pagar_e_receber_request.valor
-#     conta_a_pagar_e_receber.descricao = conta_a_pagar_e_receber_request.descricao
+    #Busco no meu DB(db_connection.query) uma classe a partir do "id"
+    conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
+    #Os dados recebido e salvo na variavel, são atualziados nas variaveis através das respectivas variaveis
+    conta_a_pagar_e_receber.tipo = conta_a_pagar_e_receber_request.tipo
+    conta_a_pagar_e_receber.valor = conta_a_pagar_e_receber_request.valor
+    conta_a_pagar_e_receber.descricao = conta_a_pagar_e_receber_request.descricao
 
-#     db_connection.add(conta_a_pagar_e_receber)
-#     db_connection.commit()
-#     db_connection.refresh()
+    db_connection.add(conta_a_pagar_e_receber)
+    db_connection.commit()
+    db_connection.refresh(conta_a_pagar_e_receber)
 
-#     return conta_a_pagar_e_receber
+    return conta_a_pagar_e_receber
+
+@router.delete("/{id_conta_a_pagar_e_receber}", status_code=204)
+def remover_conta(id_conta_a_pagar_e_receber: int,
+                  db_conneciton: Session = Depends(get_db_connection)) -> None:
+
+    conta_a_pagar_e_receber = db_conneciton.get(ContasPagarReceber, id_conta_a_pagar_e_receber)
+    db_conneciton.delete(conta_a_pagar_e_receber)
+    db_conneciton.commit()

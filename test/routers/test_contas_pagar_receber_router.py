@@ -32,7 +32,7 @@ from src.models.db_models import ContasPagarReceber
 SQLALCHEMY_DATABASE_URL = "sqlite:///.test.db"
 
 #Mecanismo que irá conectar ao DataBase  através da URL informada
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread":False})
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread":False}, echo=True)
 
 #Variável responsável por criar sessões de banco de dados
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -84,6 +84,22 @@ def test_listar_contas_pagar_receber():
         #{'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
     ]
 
+def test_listar_contas_pagar_receber_by_id():
+
+    response = client.post("/contas-a-pagar-e-receber", json={
+            "descricao": "Investimento",
+            "valor": 1500,
+            "tipo": "RECEBER"
+        })
+    id_conta_a_pagar_e_receber = response.json()["id"]
+
+    response_get = client.get(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}")
+
+    assert response_get.status_code == 200
+    assert response_get.json()['descricao'] == "Investimento"
+    assert response_get.json()['valor'] == 1500
+    assert response_get.json()['tipo'] == "RECEBER"
+
 def test_criar_conta_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
@@ -104,20 +120,41 @@ def test_criar_conta_pagar_receber():
     assert response.json() == nova_conta_copy
     
 
-# def test_atualizar_conta_pagar_receber():
+def test_atualizar_conta_pagar_receber():
 
-#     response = client.post("/contas-a-pagar-e-receber", json={
-#             "descricao": "Investimento",
-#             "valor": 1500,
-#             "tipo": "RECEBER"
-#         })
-    
-#     id_conta_a_pagar_e_receber = response.json()["id"]
-    
-#     response_put = client.put("/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}", json={
-#             "descricao": "Investimento",
-#             "valor": 3000,
-#             "tipo": "RECEBER"
-#         })
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
 
-#     assert response_put.status_code == 200
+    response = client.post("/contas-a-pagar-e-receber", json={
+            "descricao": "Investimento",
+            "valor": 1500,
+            "tipo": "RECEBER"
+        })
+    
+    id_conta_a_pagar_e_receber = response.json()["id"]
+    
+    response_put = client.put(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}", json={
+            "descricao": "Investimento",
+            "valor": 3000,
+            "tipo": "RECEBER"
+        })
+
+    assert response_put.status_code == 200
+    assert response_put.json()['valor'] == 3000
+
+def test_remover_conta_pagar_receber():
+
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+
+    response = client.post("/contas-a-pagar-e-receber", json={
+            "descricao": "Investimento",
+            "valor": 1500,
+            "tipo": "RECEBER"
+        })
+    
+    id_conta_a_pagar_e_receber = response.json()["id"]
+    
+    response_delete = client.delete(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}")
+
+    assert response_delete.status_code == 204
