@@ -1,14 +1,13 @@
-from decimal import Decimal
-from enum import Enum
+from fastapi import APIRouter, Depends, HTTPException
+
 from typing import List
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
-from pydantic.config import ConfigDict
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.models.db_models import ContasPagarReceber
-
 from src.domain.conection import get_db_connection
+from src.domain.exceptions import NotFound
+
 
 router = APIRouter(prefix="/contas-a-pagar-e-receber")
 
@@ -38,6 +37,17 @@ class ContasPagarReceberRequest(BaseModel):
     # valor: Decimal = Field(gt=0)
     # tipo: ContasPagarReceberTipoEnum
 
+def buscar_por_id(id_conta_a_pagar_e_receber: int, 
+                  db_connection: Session) -> ContasPagarReceber:
+    
+    conta_a_pagar_e_receber = db_connection.get(ContasPagarReceber, id_conta_a_pagar_e_receber)
+
+    if conta_a_pagar_e_receber is None:
+        raise NotFound('Conta a Pagar e Receber')
+    return conta_a_pagar_e_receber
+
+
+
 
 @router.get("", response_model=List[ContasPagarReceberResponse])
 def listar_contas(db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
@@ -62,10 +72,14 @@ def listar_contas(db_connection: Session = Depends(get_db_connection)) -> Contas
 
 @router.get("/{id_conta_a_pagar_e_receber}", response_model=ContasPagarReceberResponse)
 def listar_contas_id(id_conta_a_pagar_e_receber: int, db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
-    #conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
-
-    return db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
     
+    #Tratando erro caso a query solicitada não esteja correta(EX. Solicitar um id inexistente)
+    # if conta_a_pagar_e_receber is None:
+    #     raise HTTPException(status_code=404, detail="Item not found")
+    
+
+    return buscar_por_id(id_conta_a_pagar_e_receber, db_connection)
+
 @router.post("", response_model=ContasPagarReceberResponse, status_code=201)
 def criar_conta(conta_a_pagar_e_receber_request: ContasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
     
@@ -86,7 +100,10 @@ def atualizar_conta(id_conta_a_pagar_e_receber: int,
                 db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
     
     #Busco no meu DB(db_connection.query) uma classe a partir do "id"
-    conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
+    #conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
+
+    #Metodo para buscar o item a partir de ID
+    conta_a_pagar_e_receber = buscar_por_id(id_conta_a_pagar_e_receber, db_connection)
     #Os dados recebido e salvo na variavel, são atualziados nas variaveis através das respectivas variaveis
     conta_a_pagar_e_receber.tipo = conta_a_pagar_e_receber_request.tipo
     conta_a_pagar_e_receber.valor = conta_a_pagar_e_receber_request.valor
@@ -100,8 +117,10 @@ def atualizar_conta(id_conta_a_pagar_e_receber: int,
 
 @router.delete("/{id_conta_a_pagar_e_receber}", status_code=204)
 def remover_conta(id_conta_a_pagar_e_receber: int,
-                  db_conneciton: Session = Depends(get_db_connection)) -> None:
+                  db_connection: Session = Depends(get_db_connection)) -> None:
 
-    conta_a_pagar_e_receber = db_conneciton.get(ContasPagarReceber, id_conta_a_pagar_e_receber)
-    db_conneciton.delete(conta_a_pagar_e_receber)
-    db_conneciton.commit()
+    conta_a_pagar_e_receber = buscar_por_id(id_conta_a_pagar_e_receber, db_connection)
+    db_connection.delete(conta_a_pagar_e_receber)
+    db_connection.commit()
+
+

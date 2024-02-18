@@ -119,7 +119,6 @@ def test_criar_conta_pagar_receber():
     assert response.status_code == 201
     assert response.json() == nova_conta_copy
     
-
 def test_atualizar_conta_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
@@ -158,3 +157,9 @@ def test_remover_conta_pagar_receber():
     response_delete = client.delete(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}")
 
     assert response_delete.status_code == 204
+
+def test_retornar_erro_nao_encontrado():
+    response_get = client.get(f"/contas-a-pagar-e-receber/")
+
+    assert response_get.status_code == 404
+    

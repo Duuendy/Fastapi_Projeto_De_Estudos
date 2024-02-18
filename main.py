@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-
+from src.domain.exceptions import NotFound
+from src.domain.exceptions_handler import not_found_exception_handler
 from src.router import contas_pagar_receber
+
 
 
 #Comando teste para verificar se os metodos de criação do BD estava funcionando - OK
@@ -14,6 +16,8 @@ from src.router import contas_pagar_receber
 
 app = FastAPI()
 app.include_router(contas_pagar_receber.router)
+app.add_exception_handler(NotFound, not_found_exception_handler)
+
 
 @app.get("/")
 def root():
