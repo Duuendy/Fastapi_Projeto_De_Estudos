@@ -10,7 +10,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.domain.conection import get_db_connection
-from src.models.db_models import ContasPagarReceber
+from models.contas_pg_models import ContasPagarReceber
 
 
 

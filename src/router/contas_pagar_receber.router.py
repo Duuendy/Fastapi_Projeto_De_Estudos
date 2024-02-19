@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from typing import List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.models.db_models import ContasPagarReceber
+from models.contas_pg_models import ContasPagarReceber
 from src.domain.conection import get_db_connection
 from src.domain.exceptions import NotFound
 
