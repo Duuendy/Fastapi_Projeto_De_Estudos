@@ -5,7 +5,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.domain.conection import get_db_connection
-from models.contas_pg_models import ContasPagarReceber
+from src.models.contas_pg_models import ContasPagarReceber
 
 
 # #FIXTURE - Definie a função setup_database como uma função que será automaticamente executada para todos os teste

@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from models.contas_pg_models import ContasPagarReceber
+from src.models.contas_pg_models import ContasPagarReceber
 from src.domain.conection import get_db_connection
 from src.domain.exceptions import NotFound
 
@@ -45,9 +45,6 @@ def buscar_por_id(id_conta_a_pagar_e_receber: int,
     if conta_a_pagar_e_receber is None:
         raise NotFound('Conta a Pagar e Receber')
     return conta_a_pagar_e_receber
-
-
-
 
 @router.get("", response_model=List[ContasPagarReceberResponse])
 def listar_contas(db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:

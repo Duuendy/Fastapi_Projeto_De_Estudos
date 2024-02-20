@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+
 from src.domain.exceptions import NotFound
 from src.domain.exceptions_handler import not_found_exception_handler
-from src.router import contas_pagar_receber
+from src.router import contas_pagar_receber_router, fornecedor_cliente_router
 
 
 
@@ -15,7 +16,8 @@ from src.router import contas_pagar_receber
 # ContasPagarReceber.metadata.create_all(bind=DB_Engine)
 
 app = FastAPI()
-app.include_router(contas_pagar_receber.router)
+app.include_router(contas_pagar_receber_router.router)
+app.include_router(fornecedor_cliente_router.router)
 app.add_exception_handler(NotFound, not_found_exception_handler)
 
 

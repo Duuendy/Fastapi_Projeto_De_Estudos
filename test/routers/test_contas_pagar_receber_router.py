@@ -10,7 +10,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.domain.conection import get_db_connection
-from models.contas_pg_models import ContasPagarReceber
+from src.models.contas_pg_models import ContasPagarReceber
 
 
 
@@ -159,7 +159,11 @@ def test_remover_conta_pagar_receber():
     assert response_delete.status_code == 204
 
 def test_retornar_erro_nao_encontrado():
-    response_get = client.get(f"/contas-a-pagar-e-receber/")
+
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+
+    response_get = client.get(f"/contas-a-pagar-e-receber/100")
 
     assert response_get.status_code == 404
     
