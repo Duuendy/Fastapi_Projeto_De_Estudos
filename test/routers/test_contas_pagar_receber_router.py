@@ -2,7 +2,7 @@ import pytest
 from main import app
 
 # from unittest.mock import Mock
-# from faker import Faker
+#from faker import Faker
 
 from fastapi.testclient import TestClient
 
@@ -12,9 +12,6 @@ from sqlalchemy.orm import sessionmaker, Session
 from src.domain.conection import get_db_connection
 from src.models.contas_pg_models import ContasPagarReceber
 
-
-
-# fake = Faker()
 
 # @pytest.fixture
 # def mock_contas_pagar_receber() -> ContasPagarReceber:
@@ -49,15 +46,15 @@ def override_get_db() -> Session: # type: ignore
 #Passo a funcao original como parametro para a funcao de teste
 app.dependency_overrides[get_db_connection] = override_get_db
 
-    
+#fake = Faker()
 client = TestClient(app)
-    
+
 
 def test_listar_contas_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
-    
+
     # client.post("/contas-a-pagar-e-receber", json={'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR'})
     # client.post("/contas-a-pagar-e-receber", json={'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'})
 
@@ -73,14 +70,11 @@ def test_listar_contas_pagar_receber():
 
     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
     assert response.status_code == 201
-    assert response.json() == nova_conta_copy
-
 
     response = client.get('/contas-a-pagar-e-receber')
     assert response.status_code == 200
-    
     assert response.json() == [
-        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR'}, 
+        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR'},
         #{'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
     ]
 
@@ -118,7 +112,7 @@ def test_criar_conta_pagar_receber():
     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
     assert response.status_code == 201
     assert response.json() == nova_conta_copy
-    
+
 def test_atualizar_conta_pagar_receber():
 
     ContasPagarReceber.metadata.drop_all(bind=engine)
@@ -129,9 +123,9 @@ def test_atualizar_conta_pagar_receber():
             "valor": 1500,
             "tipo": "RECEBER"
         })
-    
+
     id_conta_a_pagar_e_receber = response.json()["id"]
-    
+
     response_put = client.put(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}", json={
             "descricao": "Investimento",
             "valor": 3000,
@@ -151,9 +145,9 @@ def test_remover_conta_pagar_receber():
             "valor": 1500,
             "tipo": "RECEBER"
         })
-    
+
     id_conta_a_pagar_e_receber = response.json()["id"]
-    
+
     response_delete = client.delete(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}")
 
     assert response_delete.status_code == 204
@@ -166,4 +160,3 @@ def test_retornar_erro_nao_encontrado():
     response_get = client.get(f"/contas-a-pagar-e-receber/100")
 
     assert response_get.status_code == 404
-    

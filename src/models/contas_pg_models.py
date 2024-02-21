@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Numeric, String, Column
+from sqlalchemy import ForeignKey, Integer, Numeric, String, Column
 from sqlalchemy.orm import DeclarativeBase
 
 class Base_ContasPagarReceber(DeclarativeBase):
@@ -11,3 +11,5 @@ class ContasPagarReceber(Base_ContasPagarReceber):
     descricao = Column(String(30))
     valor = Column(Numeric)
     tipo = Column(String(30)) 
+
+   
