@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.models.fornecedor_cliente_models import FornecedorCliente
+from src.models.contas_pg_models import FornecedorCliente
 from src.domain.conection import get_db_connection
 from src.domain.exceptions import NotFound
 

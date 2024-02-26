@@ -1,15 +1,25 @@
-from sqlalchemy import ForeignKey, Integer, Numeric, String, Column
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Integer, Numeric, String, Column, ForeignKey
+from sqlalchemy.orm import relationship
 
-class Base_ContasPagarReceber(DeclarativeBase):
-    pass
+from src.models import DB_Model
 
-class ContasPagarReceber(Base_ContasPagarReceber):
+class ContasPagarReceber(DB_Model):
     __tablename__ = 'contas_a_pagar_receber'
 
     id = Column(Integer, primary_key=True, nullable=False)
     descricao = Column(String(30))
     valor = Column(Numeric)
-    tipo = Column(String(30)) 
+    tipo = Column(String(30))
+
+    forncedor_id = Column(Integer, ForeignKey("fornecedor_cliente.id"))
+    fornecedor = relationship("FornecedorCliente") 
+
+class FornecedorCliente(DB_Model):
+    __tablename__ = 'fornecedor_cliente'
+
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    nome = Column(String(255))
+
 
    

@@ -6,8 +6,7 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.domain.conection import get_db_connection
-from src.models.fornecedor_cliente_models import FornecedorCliente
-
+from src.models.contas_pg_models import FornecedorCliente
 #URL do banco de dados
 SQLALCHEMY_DATABASE_URL = "sqlite:///.test.db"
 

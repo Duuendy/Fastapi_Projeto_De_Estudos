@@ -12,7 +12,6 @@ from sqlalchemy.orm import sessionmaker, Session
 from src.domain.conection import get_db_connection
 from src.models.contas_pg_models import ContasPagarReceber
 
-
 # @pytest.fixture
 # def mock_contas_pagar_receber() -> ContasPagarReceber:
 

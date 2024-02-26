@@ -16,10 +16,10 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from src.models.contas_pg_models import Base_ContasPagarReceber
-from src.models.fornecedor_cliente_models import Base_FornecedorCliente
+from src.models.contas_pg_models import ContasPagarReceber
+#from src.models.fornecedor_cliente_models import FornecedorCliente
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base_ContasPagarReceber.metadata
+target_metadata = ContasPagarReceber.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
