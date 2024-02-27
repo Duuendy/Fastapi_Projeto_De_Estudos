@@ -22,11 +22,11 @@ class FornecedorClienteRequest(BaseModel):
 
 def buscar_usuario_por_id(id_fornecedor_cliente: int, db_connection: Session) -> FornecedorCliente:
      
-    forncedor_cliente = db_connection.get(FornecedorCliente, id_fornecedor_cliente)
+    fornecedor_cliente = db_connection.get(FornecedorCliente, id_fornecedor_cliente)
     
-    if forncedor_cliente is None:
+    if fornecedor_cliente is None:
         raise NotFound('Fornecedor e Cliente')
-    return forncedor_cliente
+    return fornecedor_cliente
 
 @router.get("", response_model=List[FornecedorClienteResponse])
 def listar_fornecedor_cliente(db_connecion: Session = Depends(get_db_connection)) -> FornecedorClienteResponse:

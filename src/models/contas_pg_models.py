@@ -11,12 +11,11 @@ class ContasPagarReceber(DB_Model):
     valor = Column(Numeric)
     tipo = Column(String(30))
 
-    forncedor_id = Column(Integer, ForeignKey("fornecedor_cliente.id"))
+    fornecedor_id = Column(Integer, ForeignKey("fornecedor_cliente.id"))
     fornecedor = relationship("FornecedorCliente") 
 
 class FornecedorCliente(DB_Model):
     __tablename__ = 'fornecedor_cliente'
-
 
     id = Column(Integer, primary_key=True, nullable=False)
     nome = Column(String(255))

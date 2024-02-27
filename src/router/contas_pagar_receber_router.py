@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from typing import List
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from src.router.fornecedor_cliente_router import FornecedorClienteResponse
 
-from src.models.contas_pg_models import ContasPagarReceber
+from src.models.contas_pg_models import ContasPagarReceber, FornecedorCliente
 from src.domain.conection import get_db_connection
 from src.domain.exceptions import NotFound
 
@@ -16,6 +17,7 @@ class ContasPagarReceberResponse(BaseModel):
     descricao: str
     valor: float
     tipo: str
+    fornecedor_id: FornecedorClienteResponse | None = None
 
     class ConfigDict():
         orm_mode = True
@@ -29,6 +31,8 @@ class ContasPagarReceberRequest(BaseModel):
     descricao: str
     valor: float
     tipo: str
+    fornecedor_id: int | None = None
+
 '''
     OBS - O Fiel, no atual momento está sendo removido de versões do Pydantic, a solução foi usar o 'json_schema_extra', mas não obtive sucesso;
     Preciso olhar melhor esse novo metodo;
@@ -45,6 +49,14 @@ def buscar_por_id(id_conta_a_pagar_e_receber: int,
     if conta_a_pagar_e_receber is None:
         raise NotFound('Conta a Pagar e Receber')
     return conta_a_pagar_e_receber
+
+#Verificando se o fornecedor existe - Verificando direto e caso não exista, tratar o erro
+def valida_fornecedor(fornecedor_id, db_connection):
+
+    if fornecedor_id is not None:
+        conta_a_pagar_e_receber = db_connection.query(FornecedorCliente).get(fornecedor_id)
+        if conta_a_pagar_e_receber is None:
+            raise HTTPException(status_code=422, detail="Fornecedor não existe no BD")
 
 @router.get("", response_model=List[ContasPagarReceberResponse])
 def listar_contas(db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
@@ -79,12 +91,16 @@ def listar_contas_id(id_conta_a_pagar_e_receber: int, db_connection: Session = D
 
 @router.post("", response_model=ContasPagarReceberResponse, status_code=201)
 def criar_conta(conta_a_pagar_e_receber_request: ContasPagarReceberRequest, db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
-    
+
+    #Função que irá validar se o fornecedor_id existe, caso não exista, a função criar_conta, não inicia
+    valida_fornecedor(conta_a_pagar_e_receber_request.fornecedor_id, db_connection)
+
     #Para escrever no banco, crio uma variável que tem como modelo a Class do db_models, usando os parametros e passando em uma lista;  
     conta_a_pagar_e_receber = ContasPagarReceber(
         **conta_a_pagar_e_receber_request.model_dump()
     )
 
+ 
     db_connection.add(conta_a_pagar_e_receber)
     db_connection.commit()
     db_connection.refresh(conta_a_pagar_e_receber)
@@ -96,6 +112,7 @@ def atualizar_conta(id_conta_a_pagar_e_receber: int,
                 conta_a_pagar_e_receber_request: ContasPagarReceberRequest, 
                 db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
     
+    valida_fornecedor(conta_a_pagar_e_receber_request.fornecedor_id, db_connection)
     #Busco no meu DB(db_connection.query) uma classe a partir do "id"
     #conta_a_pagar_e_receber: ContasPagarReceber = db_connection.query(ContasPagarReceber).get(id_conta_a_pagar_e_receber)
 
@@ -105,6 +122,7 @@ def atualizar_conta(id_conta_a_pagar_e_receber: int,
     conta_a_pagar_e_receber.tipo = conta_a_pagar_e_receber_request.tipo
     conta_a_pagar_e_receber.valor = conta_a_pagar_e_receber_request.valor
     conta_a_pagar_e_receber.descricao = conta_a_pagar_e_receber_request.descricao
+    conta_a_pagar_e_receber.fornecedor_id = conta_a_pagar_e_receber_request.fornecedor_id
 
     db_connection.add(conta_a_pagar_e_receber)
     db_connection.commit()

@@ -1,7 +1,7 @@
-import pytest
+
 from main import app
 
-# from unittest.mock import Mock
+#from unittest.mock import Mock
 #from faker import Faker
 
 from fastapi.testclient import TestClient
@@ -60,7 +60,8 @@ def test_listar_contas_pagar_receber():
     nova_conta = {
         "descricao": "Aluguel",
         "valor": 1000.5,
-        "tipo": "PAGAR"
+        "tipo": "PAGAR",
+        "fornecedor_id": None
     }
 
     nova_conta_copy = nova_conta.copy()
@@ -73,7 +74,7 @@ def test_listar_contas_pagar_receber():
     response = client.get('/contas-a-pagar-e-receber')
     assert response.status_code == 200
     assert response.json() == [
-        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR'},
+        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR', 'fornecedor_id': None},
         #{'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
     ]
 
@@ -82,7 +83,8 @@ def test_listar_contas_pagar_receber_by_id():
     response = client.post("/contas-a-pagar-e-receber", json={
             "descricao": "Investimento",
             "valor": 1500,
-            "tipo": "RECEBER"
+            "tipo": "RECEBER",
+            "fornecedor_id": None
         })
     id_conta_a_pagar_e_receber = response.json()["id"]
 
@@ -92,6 +94,7 @@ def test_listar_contas_pagar_receber_by_id():
     assert response_get.json()['descricao'] == "Investimento"
     assert response_get.json()['valor'] == 1500
     assert response_get.json()['tipo'] == "RECEBER"
+    assert response_get.json()['fornecedor_id'] == None
 
 def test_criar_conta_pagar_receber():
 
@@ -101,7 +104,8 @@ def test_criar_conta_pagar_receber():
     nova_conta = {
         "descricao": "Faculdade",
         "valor": 150.00,
-        "tipo": "PAGAR"
+        "tipo": "PAGAR",
+        "fornecedor_id": None
     }
 
     nova_conta_copy = nova_conta.copy()
@@ -159,3 +163,30 @@ def test_retornar_erro_nao_encontrado():
     response_get = client.get(f"/contas-a-pagar-e-receber/100")
 
     assert response_get.status_code == 404
+
+# def test_criar_conta_pagar_receber_com_fornecedor():
+
+#     ContasPagarReceber.metadata.drop_all(bind=engine)
+#     ContasPagarReceber.metadata.create_all(bind=engine)
+
+#     novo_fornecedor_cliente = {
+#         "nome": "CENTAURO"
+#     }
+
+#     client.post("/fornedor-cliente", json=novo_fornecedor_cliente)
+
+#     nova_conta = {
+#         "descricao": "Camisa do SP",
+#         "valor": 349.99,
+#         "tipo": "PAGAR",
+#         "fornecedor_id": 1
+#     }
+
+#     nova_conta_copy = nova_conta.copy()
+#     nova_conta_copy["id"] = 1
+    
+#     #nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
+
+#     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
+#     assert response.status_code == 201
+#     assert response.json() == nova_conta_copy
