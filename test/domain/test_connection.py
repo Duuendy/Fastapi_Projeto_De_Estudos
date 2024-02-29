@@ -1,13 +1,3 @@
-import pytest
-
-
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.orm import sessionmaker
-
-from src.domain.conection import get_db_connection
-from src.models.contas_pg_models import ContasPagarReceber
-
-
 # #FIXTURE - Definie a função setup_database como uma função que será automaticamente executada para todos os teste
 # @pytest.fixture(scope="session", autouse=True)
 # def setup_database()-> Engine:
@@ -32,8 +22,9 @@ from src.models.contas_pg_models import ContasPagarReceber
 #     #Passo a funcao original como parametro para a funcao de teste
 #     app.dependency_overrides[get_db_connection] = override_get_db
 
-    # ContasPagarReceber.metadata.drop_all(bind=engine)
-    # ContasPagarReceber.metadata.create_all(bind=engine)
+# ContasPagarReceber.metadata.drop_all(bind=engine)
+# ContasPagarReceber.metadata.create_all(bind=engine)
 
-    
-#Para rodar o teste usando o pytest no terminal, não está funcionando, informa o erro de não encontrar a rota de alguns classes. Precisei usar o comando python -m pytest -v
+
+# Para rodar o teste usando o pytest no terminal, não está funcionando, informa o erro de não encontrar a rota de
+# alguns classes. Precisei usar o comando python -m pytest -v

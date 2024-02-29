@@ -1,12 +1,11 @@
+import main
 
-from main import app
-
-#from unittest.mock import Mock
-#from faker import Faker
+# from unittest.mock import Mock
+# from faker import Faker
 
 from fastapi.testclient import TestClient
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.domain.conection import get_db_connection
@@ -24,33 +23,33 @@ from src.models.contas_pg_models import ContasPagarReceber
 #     return mocked_constas_pg
 
 
-#URL do banco de dados
+# URL do banco de dados
 SQLALCHEMY_DATABASE_URL = "sqlite:///.test.db"
 
-#Mecanismo que irá conectar ao DataBase  através da URL informada
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread":False}, echo=True)
+# Mecanismo que irá conectar ao DataBase  através da URL informada
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, echo=True)
 
-#Variável responsável por criar sessões de banco de dados
+# Variável responsável por criar sessões de banco de dados
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def override_get_db() -> Session: # type: ignore
-    #Instancia da sessão database
+def override_get_db() -> Session:  # type: ignore
+    # Instancia da sessão database
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-#Passo a funcao original como parametro para a funcao de teste
-app.dependency_overrides[get_db_connection] = override_get_db
 
-#fake = Faker()
-client = TestClient(app)
+# Passo a funcao original como parametro para a funcao de teste
+main.app.dependency_overrides[get_db_connection] = override_get_db
+
+# fake = Faker()
+client = TestClient(main.app)
 
 
 def test_listar_contas_pagar_receber():
-
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
@@ -61,12 +60,12 @@ def test_listar_contas_pagar_receber():
         "descricao": "Aluguel",
         "valor": 1000.5,
         "tipo": "PAGAR",
-        "fornecedor_id": None
+        "fornecedor": None
     }
 
     nova_conta_copy = nova_conta.copy()
     nova_conta_copy["id"] = 1
-    #nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
+    # nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
 
     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
     assert response.status_code == 201
@@ -74,18 +73,18 @@ def test_listar_contas_pagar_receber():
     response = client.get('/contas-a-pagar-e-receber')
     assert response.status_code == 200
     assert response.json() == [
-        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR', 'fornecedor_id': None},
-        #{'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
+        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR', 'fornecedor': None},
+        # {'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
     ]
 
-def test_listar_contas_pagar_receber_by_id():
 
+def test_listar_contas_pagar_receber_by_id():
     response = client.post("/contas-a-pagar-e-receber", json={
-            "descricao": "Investimento",
-            "valor": 1500,
-            "tipo": "RECEBER",
-            "fornecedor_id": None
-        })
+        "descricao": "Investimento",
+        "valor": 1500,
+        "tipo": "RECEBER",
+        "fornecedor": None
+    })
     id_conta_a_pagar_e_receber = response.json()["id"]
 
     response_get = client.get(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}")
@@ -94,10 +93,10 @@ def test_listar_contas_pagar_receber_by_id():
     assert response_get.json()['descricao'] == "Investimento"
     assert response_get.json()['valor'] == 1500
     assert response_get.json()['tipo'] == "RECEBER"
-    assert response_get.json()['fornecedor_id'] == None
+    assert response_get.json()['fornecedor'] is None
+
 
 def test_criar_conta_pagar_receber():
-
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
@@ -105,49 +104,49 @@ def test_criar_conta_pagar_receber():
         "descricao": "Faculdade",
         "valor": 150.00,
         "tipo": "PAGAR",
-        "fornecedor_id": None
+        "fornecedor": None
     }
 
     nova_conta_copy = nova_conta.copy()
     nova_conta_copy["id"] = 1
-    #nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
+    # nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
 
     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
     assert response.status_code == 201
     assert response.json() == nova_conta_copy
 
-def test_atualizar_conta_pagar_receber():
 
+def test_atualizar_conta_pagar_receber():
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
     response = client.post("/contas-a-pagar-e-receber", json={
-            "descricao": "Investimento",
-            "valor": 1500,
-            "tipo": "RECEBER"
-        })
+        "descricao": "Investimento",
+        "valor": 1500,
+        "tipo": "RECEBER"
+    })
 
     id_conta_a_pagar_e_receber = response.json()["id"]
 
     response_put = client.put(f"/contas-a-pagar-e-receber/{id_conta_a_pagar_e_receber}", json={
-            "descricao": "Investimento",
-            "valor": 3000,
-            "tipo": "RECEBER"
-        })
+        "descricao": "Investimento",
+        "valor": 3000,
+        "tipo": "RECEBER"
+    })
 
     assert response_put.status_code == 200
     assert response_put.json()['valor'] == 3000
 
-def test_remover_conta_pagar_receber():
 
+def test_remover_conta_pagar_receber():
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
     response = client.post("/contas-a-pagar-e-receber", json={
-            "descricao": "Investimento",
-            "valor": 1500,
-            "tipo": "RECEBER"
-        })
+        "descricao": "Investimento",
+        "valor": 1500,
+        "tipo": "RECEBER"
+    })
 
     id_conta_a_pagar_e_receber = response.json()["id"]
 
@@ -155,8 +154,8 @@ def test_remover_conta_pagar_receber():
 
     assert response_delete.status_code == 204
 
-def test_retornar_erro_nao_encontrado():
 
+def test_retornar_erro_nao_encontrado():
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
@@ -184,7 +183,7 @@ def test_retornar_erro_nao_encontrado():
 
 #     nova_conta_copy = nova_conta.copy()
 #     nova_conta_copy["id"] = 1
-    
+
 #     #nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
 
 #     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)

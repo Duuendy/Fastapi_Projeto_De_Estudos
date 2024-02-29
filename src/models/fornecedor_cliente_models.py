@@ -9,7 +9,3 @@
 
 #     id = Column(Integer, primary_key=True, nullable=False)
 #     nome = Column(String(255))
-
-
-
-
