@@ -1,8 +1,8 @@
-from main import app
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
+from main import app
 from src.domain.conection import get_db_connection
 from src.models.contas_pg_models import FornecedorCliente
 
@@ -35,8 +35,8 @@ def test_listar_contas_do_fornecedor_cliente_by_id():
     FornecedorCliente.metadata.drop_all(bind=engine)
     FornecedorCliente.metadata.create_all(bind=engine)
 
-    client.post("/fornecedor-cliente", json={"Alura"})
-    client.post("/fornecedor-cliente", json={"Escola de Picobol"})
+    client.post("/fornecedor-cliente", json={"nome": "Alura"})
+    client.post("/fornecedor-cliente", json={"nome": "Escola de Picobol"})
 
     client.post("/contas-a-pagar-e-receber", json={
         "descricao": "Curso de Python",
@@ -63,6 +63,17 @@ def test_listar_contas_do_fornecedor_cliente_by_id():
     assert response_fornecedor1.status_code == 200
     assert len(response_fornecedor1.json()) == 1
 
-    response_fornecedor2 = client.get("/fornecedor-cliente/1/contas-a-pagar-e-receber")
+    response_fornecedor2 = client.get("/fornecedor-cliente/2/contas-a-pagar-e-receber")
     assert response_fornecedor2.status_code == 200
     assert len(response_fornecedor2.json()) == 2
+
+def test_retornar_lista_vazia_de_contas_do_fornecedor_cliente_by_id():
+    FornecedorCliente.metadata.drop_all(bind=engine)
+    FornecedorCliente.metadata.create_all(bind=engine)
+
+    client.post("/fornecedor-cliente", json={"nome": "Alura"})
+
+    response_fornecedor = client.get("/fornecedor-cliente/1/contas-a-pagar-e-receber")
+    assert response_fornecedor.status_code == 200
+    assert len(response_fornecedor.json()) == 0
+
