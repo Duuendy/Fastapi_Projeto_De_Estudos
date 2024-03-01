@@ -14,4 +14,4 @@ router = APIRouter(prefix="/fornecedor-cliente")
 def listar_contas_pagar_receber_de_fornecedor_cliente_by_id(
         id_fornecedor_cliente: int,
         db_connection: Session = Depends(get_db_connection)) -> List[ContasPagarReceberResponse]:
-    return db_connection.query(ContasPagarReceber).filter_by(fornecedor_cliente_id=id_fornecedor_cliente).all()
+    return db_connection.query(ContasPagarReceber).filter_by(fornecedor_id=id_fornecedor_cliente).all()
