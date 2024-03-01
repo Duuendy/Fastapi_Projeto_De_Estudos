@@ -89,9 +89,3 @@ def remover_fornecedor_cliente(id_fornecedor_cliente: int, db_connection: Sessio
     return
 
 
-'''@router.get("/{id_fornecedor_cliente}/contas-a-pagar-e-receber", response_model=List[ContasPagarReceberResponse])
-def listar_contas_pagar_receber_de_fornecedor_cliente_by_id(
-        id_fornecedor_cliente: int,
-        db_connection: Session = Depends(get_db_connection)) -> List[ContasPagarReceberResponse]:
-    return db_connection.query(ContaPagarReceber).filter_by(fornecedor_cliente_id=id_fornecedor_cliente)
-'''
