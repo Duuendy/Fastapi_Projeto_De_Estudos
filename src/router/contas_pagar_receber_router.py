@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from typing import List
@@ -17,6 +19,9 @@ class ContasPagarReceberResponse(BaseModel):
     descricao: str
     valor: float
     tipo: str
+    data_baixa: datetime | None = None
+    valor_baixa: float | None = None
+    status: bool | None = None
     fornecedor: FornecedorClienteResponse | None = None
 
     class ConfigDict:
@@ -66,19 +71,18 @@ def listar_contas(db_connection: Session = Depends(get_db_connection)) -> Contas
 
 # def listar_contas():
 #     # metodo irá retornar uma lista de informações de operações bancárias
-#     return [
-#         ContasPagarReceberResponse(
+#     return[ContasPagarReceberResponse(
 #             id=1,
 #             descricao="Aluguel",
-#             valor=1000.50, 
+#             valor=1000,50,
 #             tipo="PAGAR"
-#         ),
+#         )
 #         ContasPagarReceberResponse(
 #             id=2,
 #             descricao="Salario",
 #             valor=5555.55, 
 #             tipo="RECEBER"
-#         ),       
+#         ),
 #     ]    
 
 @router.get("/{id_conta_a_pagar_e_receber}", response_model=ContasPagarReceberResponse)
@@ -139,3 +143,24 @@ def remover_conta(id_conta_a_pagar_e_receber: int,
     conta_a_pagar_e_receber = buscar_por_id(id_conta_a_pagar_e_receber, db_connection)
     db_connection.delete(conta_a_pagar_e_receber)
     db_connection.commit()
+
+@router.post("/{id_conta_a_pagar_e_receber}/baixar", response_model=ContasPagarReceberResponse, status_code=200)
+def baixar_conta(
+        id_conta_a_pagar_e_receber: int,
+        db_connection: Session = Depends(get_db_connection)) -> ContasPagarReceberResponse:
+
+    # Metodo para buscar o item a partir de ID
+    conta_a_pagar_e_receber = buscar_por_id(id_conta_a_pagar_e_receber, db_connection)
+
+    if conta_a_pagar_e_receber.status and conta_a_pagar_e_receber.valor == conta_a_pagar_e_receber.valor_baixa:
+        return conta_a_pagar_e_receber
+
+    conta_a_pagar_e_receber.data_baixa = datetime.now()
+    conta_a_pagar_e_receber.status = True
+    conta_a_pagar_e_receber.valor_baixa = conta_a_pagar_e_receber.valor
+
+    db_connection.add(conta_a_pagar_e_receber)
+    db_connection.commit()
+    db_connection.refresh(conta_a_pagar_e_receber)
+
+    return conta_a_pagar_e_receber

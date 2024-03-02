@@ -1,9 +1,9 @@
-import main
+from main import app
 
 # from unittest.mock import Mock
 # from faker import Faker
 
-from fastapi.testclient import TestClient
+from starlette.testclient import TestClient
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -43,39 +43,38 @@ def override_get_db() -> Session:  # type: ignore
 
 
 # Passo a funcao original como parametro para a funcao de teste
-main.app.dependency_overrides[get_db_connection] = override_get_db
+app.dependency_overrides[get_db_connection] = override_get_db
 
 # fake = Faker()
-client = TestClient(main.app)
+client = TestClient(app)
 
 
 def test_listar_contas_pagar_receber():
     ContasPagarReceber.metadata.drop_all(bind=engine)
     ContasPagarReceber.metadata.create_all(bind=engine)
 
-    # client.post("/contas-a-pagar-e-receber", json={'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR'})
-    # client.post("/contas-a-pagar-e-receber", json={'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'})
-
-    nova_conta = {
-        "descricao": "Aluguel",
-        "valor": 1000.5,
-        "tipo": "PAGAR",
-        "fornecedor": None
-    }
-
-    nova_conta_copy = nova_conta.copy()
-    nova_conta_copy["id"] = 1
-    # nova_conta_copy["valor"] = str(nova_conta_copy['valor'])
-
-    response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
-    assert response.status_code == 201
+    client.post("/contas-a-pagar-e-receber", json={
+        'descricao': 'Aluguel',
+        'valor': 1000.5,
+        'tipo': 'PAGAR',
+        'data_baixa': None,
+        'valor_baixa': None,
+        'status': False,
+        'fornecedor': None
+    })
 
     response = client.get('/contas-a-pagar-e-receber')
     assert response.status_code == 200
-    assert response.json() == [
-        {'id': 1, 'descricao': 'Aluguel', 'valor': 1000.5, 'tipo': 'PAGAR', 'fornecedor': None},
-        # {'id': 2, 'descricao': 'Salario', 'valor': 5555.55, 'tipo': 'RECEBER'}
-    ]
+    assert response.json() == [{
+        'id': 1,
+        'descricao': 'Aluguel',
+        'valor': 1000.5,
+        'tipo': 'PAGAR',
+        'data_baixa': None,
+        'valor_baixa': None,
+        'status': False,
+        'fornecedor': None
+    }]
 
 
 def test_listar_contas_pagar_receber_by_id():
@@ -101,10 +100,13 @@ def test_criar_conta_pagar_receber():
     ContasPagarReceber.metadata.create_all(bind=engine)
 
     nova_conta = {
-        "descricao": "Faculdade",
-        "valor": 150.00,
-        "tipo": "PAGAR",
-        "fornecedor": None
+        'descricao': 'Aluguel',
+        'valor': 1000.5,
+        'tipo': 'PAGAR',
+        'data_baixa': None,
+        'valor_baixa': None,
+        'status': False,
+        'fornecedor': None
     }
 
     nova_conta_copy = nova_conta.copy()
@@ -163,6 +165,7 @@ def test_retornar_erro_nao_encontrado():
 
     assert response_get.status_code == 404
 
+
 # def test_criar_conta_pagar_receber_com_fornecedor():
 
 #     ContasPagarReceber.metadata.drop_all(bind=engine)
@@ -189,3 +192,45 @@ def test_retornar_erro_nao_encontrado():
 #     response = client.post("/contas-a-pagar-e-receber", json=nova_conta)
 #     assert response.status_code == 201
 #     assert response.json() == nova_conta_copy
+
+def test_baixar_conta_pagar_receber():
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+
+    client.post("/contas-a-pagar-e-receber", json={
+        "descricao": "Aluguel",
+        "valor": 1000.5,
+        "tipo": "PAGAR",
+    })
+
+    response = client.post(f"/contas-a-pagar-e-receber/1/baixar")
+
+    assert response.status_code == 200
+    assert response.json()["status"] is True
+    assert response.json()["valor_baixa"] == 1000.5
+
+def test_baixar_conta_pagar_receber_modificada():
+    ContasPagarReceber.metadata.drop_all(bind=engine)
+    ContasPagarReceber.metadata.create_all(bind=engine)
+
+    client.post("/contas-a-pagar-e-receber", json={
+        "descricao": "Aluguel",
+        "valor": 1000.5,
+        "tipo": "PAGAR",
+    })
+
+    client.post(f"/contas-a-pagar-e-receber/1/baixar")
+
+    client.put(f"/contas-a-pagar-e-receber/1", json={
+        "descricao": "Aluguel",
+        "valor": 999,
+        "tipo": "PAGAR",
+    })
+
+    response = client.post(f"/contas-a-pagar-e-receber/1/baixar")
+
+    assert response.status_code == 200
+    assert response.json()["status"] is True
+    assert response.json()["valor"] == 999
+    assert response.json()["valor_baixa"] == 999
+
